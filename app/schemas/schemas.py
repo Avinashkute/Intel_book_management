@@ -17,7 +17,7 @@ class UserCreate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 
@@ -41,14 +41,14 @@ class BookCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     author: str = Field(..., min_length=1, max_length=255)
     genre: str = Field(..., min_length=1, max_length=50)
-    year_published: int = Field(..., ge=1000, le=9999)
+    year_published: str = Field(..., min_length=1, max_length=100)
 
 
 class BookUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     author: Optional[str] = Field(None, min_length=1, max_length=255)
     genre: Optional[str] = Field(None, min_length=1, max_length=50)
-    year_published: Optional[int] = Field(None, ge=1000, le=9999)
+    year_published: Optional[str] = Field(None, min_length=1, max_length=100)
     summary: Optional[str] = None
 
 
@@ -57,7 +57,7 @@ class BookResponse(BaseModel):
     title: str
     author: str
     genre: str
-    year_published: int
+    year_published: str
     summary: Optional[str]
 
     class Config:
@@ -91,4 +91,4 @@ class GenerateSummaryRequest(BaseModel):
     title: str
     author: str
     genre: str
-    year_published: int
+    year_published: str
