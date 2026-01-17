@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.schemas.schemas import UserCreate, UserLogin, Token, UserResponse
+from app.schemas.schemas import UserCreate, UserLogin, Token, UserResponse, RefreshTokenRequest
 from app.services.auth_service import AuthService
 from app.core.logging import get_logger
 
@@ -42,9 +42,9 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password"
             )
-        token = AuthService.create_token(user)
+        tokens = AuthService.create_tokens(user)
         logger.info(f"Login successful for user: {credentials.email}")
-        return {"access_token": token, "token_type": "bearer"}
+        return tokens
     except HTTPException:
         raise
     except Exception as e:
@@ -52,4 +52,19 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed"
+        )
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(
+    request: RefreshTokenRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        tokens = await AuthService.refresh_access_token(db, request.refresh_token)
+        return tokens
+    except Exception as e:
+        logger.error(f"Token refresh error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
         )

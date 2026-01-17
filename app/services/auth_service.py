@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.models import User, UserRole
 from app.schemas.schemas import UserCreate
-from app.core.security import verify_password, get_password_hash, create_access_token
+from app.core.security import verify_password, get_password_hash, create_access_token, create_refresh_token, verify_refresh_token
 from app.core.config import get_settings
 from app.core.logging import get_logger
 
@@ -46,12 +46,32 @@ class AuthService:
             raise
 
     @staticmethod
-    def create_token(user: User) -> str:
+    def create_tokens(user: User) -> dict:
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        return create_access_token(
+        access_token = create_access_token(
             data={"sub": user.username, "role": user.role.value},
             expires_delta=access_token_expires
         )
+        refresh_token = create_refresh_token(
+            data={"sub": user.username, "role": user.role.value}
+        )
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        }
+
+    @staticmethod
+    async def refresh_access_token(db: AsyncSession, refresh_token: str) -> dict:
+        payload = verify_refresh_token(refresh_token)
+        if not payload:
+            raise Exception("Invalid refresh token")
+        
+        user = await AuthService.get_user_by_username(db, payload["sub"])
+        if not user:
+            raise Exception("User not found")
+        
+        return AuthService.create_tokens(user)
 
     @staticmethod
     async def get_user_by_username(db: AsyncSession, username: str) -> User:
