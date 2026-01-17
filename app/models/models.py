@@ -29,7 +29,7 @@ class Book(Base):
     title = Column(String(255), nullable=False, index=True)
     author = Column(String(255), nullable=False, index=True)
     genre = Column(String(50), nullable=False, index=True)
-    year_published = Column(Integer, nullable=False)
+    year_published = Column(String(100), nullable=False)
     summary = Column(Text, nullable=True)
 
     reviews = relationship("Review", back_populates="book", cascade="all, delete-orphan")

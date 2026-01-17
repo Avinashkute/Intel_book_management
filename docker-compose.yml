@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "${APP_PORT}:${APP_PORT}"
     env_file:
       - .env
     environment:
@@ -13,14 +11,17 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
-      AI_PROVIDER: ${AI_PROVIDER}
+      LLM_MODEL: ${LLM_MODEL}
       GROQ_API_KEY: ${GROQ_API_KEY}
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_PORT}
       LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - .:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload"
 
   db:
     image: postgres:15-alpine
@@ -34,6 +35,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U book_app_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
