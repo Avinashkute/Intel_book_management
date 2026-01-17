@@ -40,9 +40,9 @@ class AIService:
             return "No reviews available."
         
         reviews_text = "\n".join([f"- Rating {r['rating']}/5: {r['review_text']}" for r in reviews])
-        prompt = f"""Summarize the following book reviews in 2-3 sentences:
+        prompt = f"""Analyze the following book reviews and provide a concise sentiment summary (2-3 sentences) highlighting the overall user feedback and common themes:
 
-         {reviews_text}
+{reviews_text}
 
-Provide only the summary without any additional text."""
+Provide only the sentiment analysis without any additional text."""
         return await self._generate(prompt)
