@@ -25,3 +25,9 @@ coverage.xml
 *.sqlite
 .env
 .DS_Store
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+.pytest_cache/

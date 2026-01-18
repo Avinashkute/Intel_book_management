@@ -44,6 +44,14 @@ app.log
 # OS
 .DS_Store
 Thumbs.db
+test.db
+*.db
 
 # Project specific
 postgres_data/
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+.pytest_cache/

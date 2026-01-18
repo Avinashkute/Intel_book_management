@@ -10,17 +10,16 @@
 ### 1. Clone & Navigate
 ```bash
 git clone <repository-url>
-cd Intel_book_management/backend
 ```
 
 ### 2. Configure Environment
 Update `.env` file with your settings:
 ```env
 # Database Configuration
-DATABASE_URL=postgresql+asyncpg://book_app_user:admin@db:5432/book_management
-DATABASE_URL_SYNC=postgresql://book_app_user:admin@db:5432/book_management
+DATABASE_URL=postgresql+asyncpg://book_app_user:password@db:5432/book_management
+DATABASE_URL_SYNC=postgresql://book_app_user:password@db:5432/book_management
 POSTGRES_USER=book_app_user
-POSTGRES_PASSWORD=admin
+POSTGRES_PASSWORD=password
 POSTGRES_DB=book_management
 
 # JWT Configuration
@@ -46,7 +45,6 @@ docker-compose up --build
 ### 4. Access API
 - **API Base URL**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
 
 ## API Usage
 
@@ -144,12 +142,18 @@ Authorization: Bearer <token>
 }
 ```
 
-#### Get Book Analytics
+#### Get Book summary
 ```bash
-GET /books/{book_id}/analytics
+GET /books/{book_id}/summary
 Authorization: Bearer <token>
 ```
 Returns aggregated ratings, sentiment analysis, and rating distribution.
+
+#### Get Recommendations
+```bash
+GET /books/recommendations/?genre=fiction
+Authorization: Bearer <token>
+```
 
 ## Configuration Options
 
@@ -205,9 +209,32 @@ docker-compose logs -f app
 ```bash
 # Complete reset
 docker-compose down -v
-docker system prune -f
 docker-compose up --build
 ```
+
+## Testing
+
+### Run All Tests
+```bash
+# Using pytest directly
+pytest tests/ -v
+
+```
+
+### Test Coverage
+```bash
+# Install coverage
+pip install pytest-cov
+
+# Run with coverage
+pytest tests/ --cov=app --cov-report=html
+```
+
+### Test Structure
+- **Unit Tests**: Test individual components (services, utilities)
+- **Integration Tests**: Test API endpoints with database
+- **Fixtures**: Reusable test data and configurations
+- **Mocking**: Mock external dependencies (AI service, database)
 
 ## Development
 
@@ -225,10 +252,4 @@ backend/
 ├── docker-compose.yml
 ├── Dockerfile
 └── requirements.txt
-```
-
-#### Get Recommendations
-```bash
-GET /books/recommendations/?genre=fiction
-Authorization: Bearer <token>
 ```
